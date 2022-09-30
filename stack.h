@@ -85,7 +85,7 @@ void StackFill(Stack* stk);
 int StackVerify(Stack* stk);
 
 /* prints the elements of the stack */
-void StackPrint(Stack* stk);
+void StackPrint(Stack* stk, FILE* log);
 
 /* prints the information about the stack */
 void StackDump(Stack* stk);

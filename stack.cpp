@@ -120,10 +120,8 @@ int StackVerify(Stack* stk)
     return stk->error;
 }
 
-void StackPrint(Stack* stk)
+void StackPrint(Stack* stk, FILE* log)
 {
-    FILE* log = fopen("log.txt", "a");
-
     for(int i = 0; i < stk->capacity; ++i)
     {
         if(i < stk->size)
@@ -136,8 +134,6 @@ void StackPrint(Stack* stk)
             fprintf(log, "\t\t[%d] = NAN(POISON)\n", i); 
         }
     }
-
-    fclose(log);
 }
 
 void StackDump(Stack* stk)
@@ -160,7 +156,7 @@ void StackDump(Stack* stk)
     fprintf(log, "\tcapacity = %zu\n", stk->capacity);
     fprintf(log, "\tdata[%p]\n", stk->data);
     fprintf(log, "\t{\n");
-    StackPrint(stk);
+    StackPrint(stk, log);
     fprintf(log, "\t}\n");
     fprintf(log, "}\n\n");
 
