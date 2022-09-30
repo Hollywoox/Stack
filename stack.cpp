@@ -4,7 +4,9 @@ void StackCtor_(Stack* stk, size_t capacity, const char* name, const char* func,
 {
     if(stk == NULL)
     {
-        printf("Error: stack pointer is NULL[%p]\n", stk);
+        FILE* log = fopen("log.txt", "a");
+        fprintf(log, "Error: stack pointer is NULL[%p]\n", stk);
+        fclose(log);
         abort();
     }
 
@@ -120,70 +122,85 @@ int StackVerify(Stack* stk)
 
 void StackPrint(Stack* stk)
 {
+    FILE* log = fopen("log.txt", "a");
+
     for(int i = 0; i < stk->capacity; ++i)
     {
         if(i < stk->size)
         {
-            printf("\t\t*[%d] = ", i);
-            printf(elem_fmt, stk->data[i]);
-            printf("\n");
+            fprintf(log, "\t\t*[%d] = ", i);
+            fprintf(log, elem_fmt, stk->data[i]);
+            fprintf(log, "\n");
         }
         else{
-            printf("\t\t[%d] = NAN(POISON)\n", i); 
+            fprintf(log, "\t\t[%d] = NAN(POISON)\n", i); 
         }
     }
+
+    fclose(log);
 }
 
 void StackDump(Stack* stk)
 {
+    FILE* log = fopen("log.txt", "a");
+
     if(stk == NULL)
     {
-        printf("Error: stack pointer is NULL[%p]\n", stk);
+        fprintf(log, "Error: stack pointer is NULL[%p]\n", stk);
+        fclose(log);
         abort();
     }
 
     const char* status = (StackVerify(stk) != 0) ? "error" : "ok";
 
-    printf("%s() at %s(%d):\n", __FUNCTION__, __FILE__, __LINE__);
-    printf("Stack[%p](%s) \"%s\" at %s() at %s(%d)\n", stk, status, stk->st_info.name, stk->st_info.func, stk->st_info.file, stk->st_info.line);
-    printf("{\n");
-    printf("\tsize = %zu\n", stk->size);
-    printf("\tcapacity = %zu\n", stk->capacity);
-    printf("\tdata[%p]\n", stk->data);
-    printf("\t{\n");
+    fprintf(log, "%s() at %s(%d):\n", __FUNCTION__, __FILE__, __LINE__);
+    fprintf(log, "Stack[%p](%s) \"%s\" at %s() at %s(%d)\n", stk, status, stk->st_info.name, stk->st_info.func, stk->st_info.file, stk->st_info.line);
+    fprintf(log, "{\n");
+    fprintf(log, "\tsize = %zu\n", stk->size);
+    fprintf(log, "\tcapacity = %zu\n", stk->capacity);
+    fprintf(log, "\tdata[%p]\n", stk->data);
+    fprintf(log, "\t{\n");
     StackPrint(stk);
-    printf("\t}\n");
-    printf("}\n\n");
+    fprintf(log, "\t}\n");
+    fprintf(log, "}\n\n");
+
+    fclose(log);
 }
 
 void PrintError(Stack* stk)
 {
+    FILE* log = fopen("log.txt", "a");
+
     if((stk->error & 2) != 0)
     {
-        printf("Error: data pointer is NULL[%p]\n", stk->data);
+        fprintf(log, "Error: data pointer is NULL[%p]\n", stk->data);
     }
 
     if((stk->error & 4) != 0)
     {
-        printf("Error: capacity is negative\n");
+        fprintf(log, "Error: capacity is negative\n");
     }
 
     if((stk->error & 8) != 0)
     {
-        printf("Error: size is negative\n");
+        fprintf(log, "Error: size is negative\n");
     }
 
     if((stk->error & 16) != 0)
     {
-        printf("Error: size is bigger than capacity\n");
+        fprintf(log, "Error: size is bigger than capacity\n");
     }
+
+    fclose(log);
 }
 
 void StackDtor(Stack* stk)
 {
     if(stk == NULL)
     {
-        printf("Error: stack pointer is NULL[%p]\n", stk);
+        FILE* log = fopen("log.txt", "a");
+        fprintf(log, "Error: stack pointer is NULL[%p]\n", stk);
+        fclose(log);
         abort();
     }
 
