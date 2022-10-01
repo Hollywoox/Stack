@@ -97,24 +97,24 @@ int StackVerify(Stack* stk)
         return stk->error;
     }
 
-    if(stk->data == NULL)
+    if((stk->data == NULL) && ((stk->error & NULL_DATA_POINTER) == 0)) 
     {
-        stk->error += pow(2, (int)NULL_DATA_POINTER);
+        stk->error += (int)NULL_DATA_POINTER;
     }
 
-    if(stk->capacity < 0)
+    if(((long long)stk->capacity < 0) && ((stk->error & BAD_CAPACITY) == 0))
     {
-        stk->error += pow(2, (int)BAD_CAPACITY);
+        stk->error += (int)BAD_CAPACITY;
     }
 
-    if(stk->size > stk->capacity)
+    if((stk->size > stk->capacity) && ((stk->error & BIG_SIZE) == 0))
     {
-        stk->error += pow(2, (int)BIG_SIZE);
+        stk->error += (int)BIG_SIZE;
     }
 
-    if(stk->size < 0)
+    if(((long long)stk->size < 0) && ((stk->error & BAD_SIZE) == 0))
     {
-        stk->error += pow(2, (int)BAD_SIZE);
+        stk->error += (int)BAD_SIZE;
     }
 
     return stk->error;
@@ -154,6 +154,7 @@ void StackDump(Stack* stk)
     fprintf(log, "{\n");
     fprintf(log, "\tsize = %zu\n", stk->size);
     fprintf(log, "\tcapacity = %zu\n", stk->capacity);
+    fprintf(log, "\terror code = %d\n", stk->error);
     fprintf(log, "\tdata[%p]\n", stk->data);
     fprintf(log, "\t{\n");
     StackPrint(stk, log);
@@ -167,22 +168,22 @@ void PrintError(Stack* stk)
 {
     FILE* log = fopen("log.txt", "a");
 
-    if((stk->error & 2) != 0)
+    if((stk->error & NULL_DATA_POINTER) != 0)
     {
         fprintf(log, "Error: data pointer is NULL[%p]\n", stk->data);
     }
 
-    if((stk->error & 4) != 0)
+    if((stk->error & BAD_CAPACITY) != 0)
     {
         fprintf(log, "Error: capacity is negative\n");
     }
 
-    if((stk->error & 8) != 0)
+    if((stk->error & BAD_SIZE) != 0)
     {
         fprintf(log, "Error: size is negative\n");
     }
 
-    if((stk->error & 16) != 0)
+    if((stk->error & BIG_SIZE) != 0)
     {
         fprintf(log, "Error: size is bigger than capacity\n");
     }

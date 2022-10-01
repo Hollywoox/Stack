@@ -15,6 +15,10 @@ int main()
 
     StackDump(&stk1);
 
+    StackPop(&stk1);
+    StackPop(&stk1);
+    StackPop(&stk1); 
+
     StackDtor(&stk1);
 
     return 0;

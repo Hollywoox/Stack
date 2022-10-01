@@ -55,11 +55,11 @@ typedef struct
 
 enum errors
 {
-    NULL_ST_POINTER,
-    NULL_DATA_POINTER,
-    BAD_CAPACITY,
-    BAD_SIZE,
-    BIG_SIZE
+    NULL_ST_POINTER = 1,
+    NULL_DATA_POINTER = 2,
+    BAD_CAPACITY = 4,
+    BAD_SIZE = 8,
+    BIG_SIZE = 16
 };
 
 
