@@ -3,36 +3,51 @@
 #include <assert.h>
 #include <math.h>
 
-#define DOUBLE
+#define INT
+#define CANARY_PROT
+
+#ifdef CANARY_PROT
+#define ON_CANARY_PROT(...) __VA_ARGS__
+#else
+#define ON_CANARY_PROT(...) 0
+#endif
 
 #ifdef INT
     typedef int elem_t;
     static const char* elem_fmt = "%d";
-    const int poison = 0xDEADF00D;
+    const int POISON = 0xDEADF00D;
+    const int SHIFT = 2;
 #endif
 
 #ifdef DOUBLE
     typedef double elem_t;
     static const char* elem_fmt = "%f";
-    const double poison = -6789456123.435612;
+    const double POISON = -6789456123.435612;
+    const int SHIFT = 1;
 #endif
 
 #ifdef CHAR
     typedef char elem_t;
     static const char* elem_fmt = "%c";
-    const char poison = '\0';
+    const char POISON = '\0';
+    const int SHIFT = 8;
 #endif
 
 
 #define StackCtor(stk, size) StackCtor_((stk), (size), #stk, __FUNCTION__, __FILE__, __LINE__)
 
-#define ASSERT_OK(stk) if(StackVerify(stk) != 0)  \
-                       {                          \
-                           StackDump(stk);        \
-                           PrintError(stk);       \
-                           abort();               \
+#define StackDump(stk) StackDump_((stk), __FUNCTION__, __FILE__, __LINE__)
+
+#define ASSERT_OK(stk) if(StackVerify(stk) != 0)                                    \
+                       {                                                            \
+                           StackDump_(stk, __FUNCTION__, __FILE__, __LINE__);        \
+                           PrintError(stk);                                         \
+                           abort();                                                 \
                        }
 
+
+typedef unsigned long long canary;
+#define CANARY 0xBADDED32DEADF00D
 
 typedef struct 
 {
@@ -44,12 +59,16 @@ typedef struct
 
 typedef struct
 {
-    elem_t* data;
+    canary left_protector;
+
     size_t size;
     size_t capacity;
+    elem_t* data;
     int error;
 
     varinfo st_info;
+
+    canary right_protector;
 } Stack;
 
 
@@ -59,7 +78,12 @@ enum errors
     NULL_DATA_POINTER = 2,
     BAD_CAPACITY = 4,
     BAD_SIZE = 8,
-    BIG_SIZE = 16
+    BIG_SIZE = 16,
+    RIGHT_ST_CANARY_DEAD = 32,
+    LEFT_ST_CANARY_DEAD = 64,
+    RIGHT_DATA_CANARY_DEAD = 128,
+    LEFT_DATA_CANARY_DEAD = 256,
+    ELEM_POISONED = 512
 };
 
 
@@ -88,7 +112,7 @@ int StackVerify(Stack* stk);
 void StackPrint(Stack* stk, FILE* log);
 
 /* prints the information about the stack */
-void StackDump(Stack* stk);
+void StackDump_(Stack* stk, const char* function, const char* file, int line);
 
 /* prints the information about errors */
 void PrintError(Stack* stk);

@@ -4,10 +4,10 @@
 int main()
 {
     Stack stk1 = {};
-    StackCtor(&stk1, 1.0);
-    StackPush(&stk1, 3.0);
-    StackPush(&stk1, 10.0);
-    StackPush(&stk1, 15.0); 
+    StackCtor(&stk1, 1);
+    StackPush(&stk1, 3);
+    StackPush(&stk1, 10);
+    StackPush(&stk1, 15); 
 
     StackDump(&stk1);
 
@@ -17,7 +17,8 @@ int main()
 
     StackPop(&stk1);
     StackPop(&stk1);
-    StackPop(&stk1); 
+    //StackPop(&stk1); 
+    StackDump(&stk1);
 
     StackDtor(&stk1);
 
