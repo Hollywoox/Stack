@@ -61,15 +61,19 @@ elem_t StackPop(Stack* stk)
         stk->size--;
         ASSERT_OK(stk);
     }
+    
+    elem_t last = stk->data[stk->size - 1];
 
-    if((stk->size - 1 == (stk->capacity / 2)) && (stk->capacity % 2 == 0))
+    if(stk->size - 1 == stk->capacity / 2)
     {
         StackResizeDown(stk);
     }
 
     stk->size--;
-    elem_t last = stk->data[stk->size];
-    stk->data[stk->size] = POISON;
+    if(stk->size != 0)
+    {
+        stk->data[stk->size] = POISON;
+    }
     //count_hash
 
     return last;
@@ -80,23 +84,44 @@ void StackResizeUp(Stack* stk)
     ASSERT_OK(stk);
 
     stk->data = stk->data - SHIFT;
-    stk->data = (elem_t*)realloc(stk->data, stk->capacity * sizeof(elem_t) * 2 + 2 * sizeof(canary));
-    if(stk->data == NULL)
+
+    if(stk->capacity != 0)
     {
-        ASSERT_OK(stk);
+        stk->data = (elem_t*)realloc(stk->data, stk->capacity * sizeof(elem_t) * 2 + 2 * sizeof(canary));
+        if(stk->data == NULL)
+        {
+            ASSERT_OK(stk);
+        }
+
+        *((canary*)stk->data) = CANARY;
+        *((canary*)(stk->data + SHIFT + stk->capacity * 2)) = CANARY;
+
+        stk->data = stk->data + SHIFT;
+
+        for(int i = stk->capacity; i < 2 * stk->capacity; ++i)
+        {
+            stk->data[i] = POISON;
+        }    
+
+        stk->capacity *= 2;
     }
 
-    *((canary*)stk->data) = CANARY;
-    *((canary*)(stk->data + SHIFT + stk->capacity * 2)) = CANARY;
-
-    stk->data = stk->data + SHIFT;
-
-    for(int i = stk->capacity; i < 2 * stk->capacity; ++i)
+    else
     {
-        stk->data[i] = POISON;
-    }    
+        stk->capacity = 1;
+        stk->data = (elem_t*)realloc(stk->data, sizeof(elem_t) + 2 * sizeof(canary));
+        if(stk->data == NULL)
+        {
+            ASSERT_OK(stk);
+        }
 
-    stk->capacity *= 2;
+        *((canary*)stk->data) = CANARY;
+        *((canary*)(stk->data + SHIFT + stk->capacity)) = CANARY;
+
+        stk->data = stk->data + SHIFT;
+        
+        stk->data[0] = POISON;
+    }
 }
 
 void StackResizeDown(Stack* stk)
@@ -104,7 +129,7 @@ void StackResizeDown(Stack* stk)
     ASSERT_OK(stk);
 
     stk->data = stk->data - SHIFT;
-    stk->data = (elem_t*)realloc(stk->data, stk->capacity * sizeof(elem_t) / 2 + 2 * sizeof(canary));
+    stk->data = (elem_t*)realloc(stk->data, (stk->capacity / 2) * sizeof(elem_t) + 2 * sizeof(canary));
     if(stk->data == NULL)
     {
         ASSERT_OK(stk);
@@ -193,7 +218,8 @@ void StackPrint(Stack* stk, FILE* log)
             fprintf(log, elem_fmt, stk->data[i]);
             fprintf(log, "\n");
         }
-        else{
+        else
+        {
             fprintf(log, "\t\t[%d] = NAN(POISON)\n", i); 
         }
     }
@@ -281,10 +307,7 @@ void PrintError(Stack* stk)
 
 void StackDtor(Stack* stk)
 {
-    if(stk == NULL)
-    {
-        ASSERT_OK(stk);
-    }
+    ASSERT_OK(stk);
 
     stk->data = stk->data - SHIFT;
     free(stk->data);
