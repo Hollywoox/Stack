@@ -1,26 +1,26 @@
 main() at main.cpp(10):
-Stack[0x16b73b378](ok) "&stk1" at main() at main.cpp(7)
+Stack[0x16fb63368](ok) "&stk1" at main() at main.cpp(7)
 {
 	size = 1
 	capacity = 1
 	error code = 0
 	left stack canary = 13465179263647739917
 	right stack canary = 13465179263647739917
-	data[0x148e06888]
+	data[0x155e06888]
 	{
 		*[0] = 3
 	}
 }
 
 main() at main.cpp(15):
-Stack[0x16b73b378](ok) "&stk1" at main() at main.cpp(7)
+Stack[0x16fb63368](ok) "&stk1" at main() at main.cpp(7)
 {
 	size = 3
 	capacity = 4
 	error code = 0
 	left stack canary = 13465179263647739917
 	right stack canary = 13465179263647739917
-	data[0x148e06888]
+	data[0x155e06888]
 	{
 		*[0] = 3
 		*[1] = 10
@@ -30,14 +30,14 @@ Stack[0x16b73b378](ok) "&stk1" at main() at main.cpp(7)
 }
 
 main() at main.cpp(19):
-Stack[0x16b73b378](ok) "&stk1" at main() at main.cpp(7)
+Stack[0x16fb63368](ok) "&stk1" at main() at main.cpp(7)
 {
 	size = 2
 	capacity = 2
 	error code = 0
 	left stack canary = 13465179263647739917
 	right stack canary = 13465179263647739917
-	data[0x148e06888]
+	data[0x155e06888]
 	{
 		*[0] = 3
 		*[1] = 10
@@ -45,50 +45,44 @@ Stack[0x16b73b378](ok) "&stk1" at main() at main.cpp(7)
 }
 
 main() at main.cpp(24):
-Stack[0x16b73b378](ok) "&stk1" at main() at main.cpp(7)
+Stack[0x16fb63368](ok) "&stk1" at main() at main.cpp(7)
 {
 	size = 0
 	capacity = 0
 	error code = 0
 	left stack canary = 13465179263647739917
 	right stack canary = 13465179263647739917
-	data[0x148e06888]
+	data[0x155e06888]
 	{
 	}
 }
 
 main() at main.cpp(27):
-Stack[0x16b73b378](ok) "&stk1" at main() at main.cpp(7)
+Stack[0x16fb63368](ok) "&stk1" at main() at main.cpp(7)
 {
 	size = 1
 	capacity = 1
 	error code = 0
 	left stack canary = 13465179263647739917
 	right stack canary = 13465179263647739917
-	data[0x148e06888]
+	data[0x155e06888]
 	{
 		*[0] = 36
 	}
 }
 
-main() at main.cpp(34):
-Stack[0x16b73b378](ok) "&stk1" at main() at main.cpp(7)
+StackPop() at stack.cpp(70):
+Stack[0x16fb63368](error) "&stk1" at main() at main.cpp(7)
 {
-	size = 5
-	capacity = 8
-	error code = 0
+	size = 18446744073709551615
+	capacity = 0
+	error code = 1032
 	left stack canary = 13465179263647739917
 	right stack canary = 13465179263647739917
-	data[0x148e06888]
+	data[0x155e06888]
 	{
-		*[0] = 36
-		*[1] = 49
-		*[2] = 50
-		*[3] = 51
-		*[4] = 52
-		[5] = NAN(POISON)
-		[6] = NAN(POISON)
-		[7] = NAN(POISON)
 	}
 }
 
+Error: the hash of the structure was changed!
+Error: size is negative

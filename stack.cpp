@@ -8,6 +8,11 @@ void StackCtor_(Stack* stk, size_t capacity, const char* name, const char* func,
     }
 
     stk->capacity = capacity;
+    if((long long)stk->capacity < 0)
+    {
+        ASSERT_OK(stk);
+    }
+
     stk->size = 0;
     stk->error = 0;
     stk->left_protector = CANARY;
@@ -33,8 +38,10 @@ void StackCtor_(Stack* stk, size_t capacity, const char* name, const char* func,
         stk->data[i] = POISON;
     }
 
+    stk->st_hash = HashFuncStack(stk);
+    stk->data_hash = HashFuncData(stk);
+
     ASSERT_OK(stk);
-    //count_hash
 }
 
 void StackPush(Stack* stk, elem_t value)
@@ -47,7 +54,8 @@ void StackPush(Stack* stk, elem_t value)
     }
 
     stk->data[stk->size++] = value;
-    //count_hash
+    stk->st_hash = HashFuncStack(stk);
+    stk->data_hash = HashFuncData(stk);
 
     ASSERT_OK(stk);
 }
@@ -74,7 +82,9 @@ elem_t StackPop(Stack* stk)
     {
         stk->data[stk->size] = POISON;
     }
-    //count_hash
+    
+    stk->st_hash = HashFuncStack(stk);
+    stk->data_hash = HashFuncData(stk);
 
     return last;
 }
@@ -119,7 +129,7 @@ void StackResizeUp(Stack* stk)
         *((canary*)(stk->data + SHIFT + stk->capacity)) = CANARY;
 
         stk->data = stk->data + SHIFT;
-        
+
         stk->data[0] = POISON;
     }
 }
@@ -152,25 +162,46 @@ int StackVerify(Stack* stk)
         abort();
     }
 
-    if((stk->data == NULL) && ((stk->error & NULL_DATA_POINTER) == 0)) 
+    if((long long)stk->capacity < 0)
     {
-        stk->error += (int)NULL_DATA_POINTER;
-        return stk->error;
-    }
-
-    if(((long long)stk->capacity < 0) && ((stk->error & BAD_CAPACITY) == 0))
-    {
-        stk->error += (int)BAD_CAPACITY;
-    }
-
-    if((stk->size > stk->capacity) && ((stk->error & BIG_SIZE) == 0))
-    {
-        stk->error += (int)BIG_SIZE;
+        if((stk->error & BAD_CAPACITY) == 0)
+        {
+            stk->error += (int)BAD_CAPACITY;
+        }
+        return stk->capacity;
     }
 
     if(((long long)stk->size < 0) && ((stk->error & BAD_SIZE) == 0))
     {
         stk->error += (int)BAD_SIZE;
+    }
+
+    if(stk->data == NULL)
+    {
+        if((stk->error & NULL_DATA_POINTER) == 0)
+        {
+            stk->error += (int)NULL_DATA_POINTER;
+        }
+        return stk->error;
+    }
+
+    if(stk->st_hash != HashFuncStack(stk))
+    {
+        if((stk->error & WRONG_ST_HASH) == 0)
+        {
+            stk->error += (int)WRONG_ST_HASH;
+        }
+        return stk->error;
+    }
+
+    if((stk->data_hash != HashFuncData(stk)) && ((stk->error & WRONG_DATA_HASH) == 0))
+    {
+        stk->error += (int)WRONG_DATA_HASH;
+    }
+
+    if((stk->size > stk->capacity) && ((stk->error & BIG_SIZE) == 0))
+    {
+        stk->error += (int)BIG_SIZE;
     }
 
     if((stk->left_protector != CANARY) && ((stk->error & LEFT_ST_CANARY_DEAD) == 0))
@@ -234,7 +265,8 @@ void StackDump_(Stack* stk, const char* function, const char* file, int line)
         ASSERT_OK(stk);
     }
 
-    const char* status = (StackVerify(stk) != 0) ? "error" : "ok";
+    StackVerify(stk);
+    const char* status = (stk->error != 0) ? "error" : "ok";
 
     fprintf(log, "%s() at %s(%d):\n", function, file, line);
     fprintf(log, "Stack[%p](%s) \"%s\" at %s() at %s(%d)\n", stk, status, stk->st_info.name, stk->st_info.func, stk->st_info.file, stk->st_info.line);
@@ -246,7 +278,7 @@ void StackDump_(Stack* stk, const char* function, const char* file, int line)
     fprintf(log, "\tright stack canary = %llu\n", stk->right_protector);
     fprintf(log, "\tdata[%p]\n", stk->data);
     fprintf(log, "\t{\n");
-    StackPrint(stk, log);
+    if(!stk->error) StackPrint(stk, log);
     fprintf(log, "\t}\n");
     fprintf(log, "}\n\n");
 
@@ -259,7 +291,17 @@ void PrintError(Stack* stk)
 
     if((stk->error & NULL_DATA_POINTER) != 0)
     {
-        fprintf(log, "Error: data pointer is NULL[%p]\n", stk->data);
+        fprintf(log, "Error: the data pointer is NULL[%p]\n", stk->data);
+    }
+
+    if((stk->error & WRONG_ST_HASH) != 0)
+    {
+        fprintf(log, "Error: the hash of the structure was changed!\n");
+    }
+
+    if((stk->error & WRONG_DATA_HASH) != 0)
+    {
+        fprintf(log, "Error: the hash of the data array of the was changed!\n");
     }
 
     if((stk->error & BAD_CAPACITY) != 0)
@@ -303,6 +345,36 @@ void PrintError(Stack* stk)
     }
 
     fclose(log);
+}
+
+unsigned long HashFuncStack(Stack* stk)
+{
+    int stack_size = sizeof(size_t) * 2 + sizeof(elem_t*) + sizeof(int);
+    unsigned long hash = 5381;
+
+    char* ptr = ((char*)(&stk->size));
+    for(int i = 0; i < stack_size; ++i)
+    {
+        hash = (hash << 5) + hash + (int)(*ptr);
+        ++ptr;
+    }
+
+    return hash;
+}
+
+unsigned long HashFuncData(Stack* stk)
+{
+    int data_size = sizeof(elem_t) * (stk->capacity);
+    unsigned long hash = 5381;
+
+    char* ptr = (char*)stk->data;
+    for(int i = 0; i < data_size; ++i)
+    {
+        hash = (hash << 5) + hash + (int)(*ptr);
+        ++ptr;
+    }
+
+    return hash;
 }
 
 void StackDtor(Stack* stk)

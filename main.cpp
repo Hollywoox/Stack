@@ -28,10 +28,17 @@ int main()
     StackPush(&stk1, 49);
     StackPush(&stk1, 50);
     StackPush(&stk1, 51);
-    StackPush(&stk1, 52);
+
+    StackPop(&stk1);
+    StackPop(&stk1);
+    StackPop(&stk1);
+    StackPop(&stk1);
+    StackPop(&stk1);
+    StackPop(&stk1);
+    //StackPush(&stk1, 52);
+    //stk1.capacity = 1000;
     //StackPush(&stk1, 53);
-    //StackPush(&stk1, 54);
-    StackDump(&stk1);    
+    //StackPush(&stk1, 54);  
 
     StackDtor(&stk1);
 

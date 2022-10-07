@@ -40,7 +40,7 @@
 
 #define ASSERT_OK(stk) if(StackVerify(stk) != 0)                                    \
                        {                                                            \
-                           StackDump_(stk, __FUNCTION__, __FILE__, __LINE__);        \
+                           StackDump_(stk, __FUNCTION__, __FILE__, __LINE__);       \
                            PrintError(stk);                                         \
                            abort();                                                 \
                        }
@@ -68,6 +68,9 @@ typedef struct
 
     varinfo st_info;
 
+    unsigned long st_hash;
+    unsigned long data_hash;
+
     canary right_protector;
 } Stack;
 
@@ -83,7 +86,9 @@ enum errors
     LEFT_ST_CANARY_DEAD = 64,
     RIGHT_DATA_CANARY_DEAD = 128,
     LEFT_DATA_CANARY_DEAD = 256,
-    ELEM_POISONED = 512
+    ELEM_POISONED = 512,
+    WRONG_ST_HASH = 1024,
+    WRONG_DATA_HASH = 2048
 };
 
 
@@ -116,6 +121,12 @@ void StackDump_(Stack* stk, const char* function, const char* file, int line);
 
 /* prints the information about errors */
 void PrintError(Stack* stk);
+
+/* counts hash for the stack structure */
+unsigned long HashFuncStack(Stack* stk);
+
+/* counts hash for the data array of the stack */
+unsigned long HashFuncData(Stack* stk);
 
 /* deletes the whole stack and clears the memory */
 void StackDtor(Stack* stk);
