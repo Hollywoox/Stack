@@ -176,6 +176,11 @@ int StackVerify(Stack* stk)
         stk->error += (int)BAD_SIZE;
     }
 
+    if((stk->size > stk->capacity) && ((stk->error & BIG_SIZE) == 0))
+    {
+        stk->error += (int)BIG_SIZE;
+    }
+
     if(stk->data == NULL)
     {
         if((stk->error & NULL_DATA_POINTER) == 0)
@@ -199,11 +204,6 @@ int StackVerify(Stack* stk)
         stk->error += (int)WRONG_DATA_HASH;
     }
 
-    if((stk->size > stk->capacity) && ((stk->error & BIG_SIZE) == 0))
-    {
-        stk->error += (int)BIG_SIZE;
-    }
-
     if((stk->left_protector != CANARY) && ((stk->error & LEFT_ST_CANARY_DEAD) == 0))
     {
         stk->error += (int)LEFT_ST_CANARY_DEAD;
@@ -222,18 +222,6 @@ int StackVerify(Stack* stk)
     if((*((canary*)(stk->data + stk->capacity)) != CANARY) && ((stk->error & RIGHT_DATA_CANARY_DEAD) == 0))
     {
         stk->error += (int)RIGHT_DATA_CANARY_DEAD;
-    }
-
-    if((stk->data != NULL) && ((stk->error & ELEM_POISONED) == 0))
-    {
-        for(int i = 0; i < stk->size; ++i)
-        {
-            if(stk->data[i] == POISON)
-            {
-                stk->error += (int)ELEM_POISONED;
-                break;
-            }
-        }
     }
 
     return stk->error;
@@ -337,11 +325,6 @@ void PrintError(Stack* stk)
     if((stk->error & RIGHT_DATA_CANARY_DEAD) != 0)
     {
         fprintf(log, "Error: Shit! Right canary in data died!\n");
-    }
-
-    if((stk->error & ELEM_POISONED) != 0)
-    {
-        fprintf(log, "Error: There are some innocent poisoned elements in the stack!\n");
     }
 
     fclose(log);
