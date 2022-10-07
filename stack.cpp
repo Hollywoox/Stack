@@ -257,7 +257,7 @@ void StackDump_(Stack* stk, const char* function, const char* file, int line)
     const char* status = (stk->error != 0) ? "error" : "ok";
 
     fprintf(log, "%s() at %s(%d):\n", function, file, line);
-    fprintf(log, "Stack[%p](%s) \"%s\" at %s() at %s(%d)\n", stk, status, stk->st_info.name, stk->st_info.func, stk->st_info.file, stk->st_info.line);
+    fprintf(log, "Stack[%p](%s) \"%s\" at %s() at %s(%d)\n", stk, status, stk->st_info.name + 1, stk->st_info.func, stk->st_info.file, stk->st_info.line);
     fprintf(log, "{\n");
     fprintf(log, "\tsize = %zu\n", stk->size);
     fprintf(log, "\tcapacity = %zu\n", stk->capacity);
